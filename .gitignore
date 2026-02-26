@@ -26,13 +26,22 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
+# local env files (nunca subir credenciales)
 .env
 .env*.local
+.env.development
+.env.production
 
 # vercel
 .vercel
 
-# ide
+# ide / cursor
 .idea
 .vscode
+.cursor
+
+# conversaciones y datos locales del IDE
+agent-transcripts/
+
+# assets generados por el IDE (capturas, etc.)
+/assets/

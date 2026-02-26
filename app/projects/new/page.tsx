@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -22,13 +22,38 @@ export default function NewProjectPage () {
     budget_estimate: '',
     methodology: 'hibrido'
   })
+  const [fileName, setFileName] = useState<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFile = (file: File | null) => {
+    if (!file) {
+      setFileName(null)
+      return
+    }
+    if (file.type !== 'application/pdf') return
+    setFileName(file.name)
+    const input = fileInputRef.current
+    if (input) {
+      const dt = new DataTransfer()
+      dt.items.add(file)
+      input.files = dt.files
+    }
+  }
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file?.type === 'application/pdf') handleFile(file)
+  }
+  const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true) }
+  const onDragLeave = () => setIsDragging(false)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
-    const formEl = e.currentTarget
-    const fileInput = formEl.querySelector<HTMLInputElement>('input[name="file"]')
-    const file = fileInput?.files?.[0]
+    const file = fileInputRef.current?.files?.[0]
     if (!file) {
       setError('Selecciona un archivo PDF')
       return
@@ -45,14 +70,21 @@ export default function NewProjectPage () {
 
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: fd })
-      const data = await res.json()
+      let data: { error?: string; project_id?: string }
+      try {
+        data = await res.json()
+      } catch {
+        setError(res.ok ? 'Error de conexión' : `Error ${res.status}. Comprueba que el servidor esté en marcha.`)
+        return
+      }
       if (!res.ok) {
         setError(data.error ?? 'Error al subir')
         return
       }
       router.push(`/projects/${data.project_id}`)
-    } catch {
-      setError('Error de conexión')
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Error de conexión'
+      setError(`No se pudo conectar con el servidor. ¿Estás en la misma URL donde corre npm run dev? (ej. http://localhost:3003). ${msg}`)
     } finally {
       setIsSubmitting(false)
     }
@@ -74,20 +106,38 @@ export default function NewProjectPage () {
 
       <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <div>
-          <label htmlFor="file" className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-slate-700">
             Documento PDF *
           </label>
           <input
-            id="file"
+            ref={fileInputRef}
             name="file"
             type="file"
             accept="application/pdf"
             required
-            className="mt-1 block w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-slate-700"
+            className="hidden"
+            onChange={e => handleFile(e.target.files?.[0] ?? null)}
           />
-          <p className="mt-1 text-xs text-slate-500">
-            Máx. 15 MB. Contrato, SoW, RFP o anexo.
-          </p>
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => fileInputRef.current?.click()}
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            className={`mt-1 flex min-h-[120px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors ${
+              isDragging
+                ? 'border-slate-500 bg-slate-100'
+                : 'border-slate-300 bg-slate-50 hover:border-slate-400 hover:bg-slate-100'
+            }`}
+          >
+            <span className="text-sm font-medium text-slate-600">
+              {fileName ?? 'Arrastre el PDF aquí o haga clic para seleccionar'}
+            </span>
+            <p className="mt-1 text-xs text-slate-500">
+              Máx. 15 MB. Contrato, SoW, RFP o anexo.
+            </p>
+          </div>
         </div>
 
         <div>

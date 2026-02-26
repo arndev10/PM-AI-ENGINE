@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/server'
+import { loadEnv } from '@/lib/load-env'
 
 const BUCKET = 'documents'
 const MAX_FILE_BYTES = 15 * 1024 * 1024 // 15 MB
@@ -7,12 +8,13 @@ const ALLOWED_TYPES = ['application/pdf']
 const isDev = process.env.NODE_ENV === 'development'
 
 export async function POST (request: Request) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  loadEnv()
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
   if (!supabaseUrl || !serviceRoleKey) {
     return NextResponse.json(
       {
-        error: 'Faltan variables de Supabase. Añade NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en .env (copia .env.example).'
+        error: 'Faltan variables de Supabase. Añade NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en .env. Reinicia el servidor (Ctrl+C, luego npm run dev) desde la carpeta del proyecto y abre solo la URL que muestra la terminal (ej. localhost:3000).'
       },
       { status: 503 }
     )

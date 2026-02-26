@@ -42,11 +42,69 @@ export interface Document {
   created_at: string
 }
 
+export interface CharterContent {
+  project_name: string
+  scope_summary: string
+  objectives: string[]
+  deliverables: Array<{ name: string; description: string }>
+  milestones: Array<{ name: string; date_estimate?: string }>
+  constraints: string[]
+  assumptions: string[]
+  budget_summary: string
+  duration_summary: string
+  stakeholders: Array<{ role: string; responsibility: string }>
+  approval_criteria: string[]
+}
+
+export interface RiskRow {
+  id: number
+  description: string
+  probability: 'alta' | 'media' | 'baja'
+  impact: 'alto' | 'medio' | 'bajo'
+  severity: 'critico' | 'alto' | 'medio' | 'bajo'
+  mitigation: string
+  owner: string
+  status: 'abierto' | 'mitigado' | 'cerrado'
+}
+
+export interface RiskRegisterContent {
+  risks: RiskRow[]
+}
+
+export interface StakeholderRow {
+  id: number
+  name_role: string
+  interest: string
+  influence: 'alta' | 'media' | 'baja'
+  engagement_strategy: string
+}
+
+export interface StakeholderRegisterContent {
+  stakeholders: StakeholderRow[]
+}
+
+export interface WBSTask {
+  id: string
+  name: string
+  children?: WBSTask[]
+}
+
+export interface WBSContent {
+  phases: WBSTask[]
+}
+
+export type ArtifactContent =
+  | CharterContent
+  | RiskRegisterContent
+  | StakeholderRegisterContent
+  | WBSContent
+
 export interface Artifact {
   id: string
   project_id: string
   type: ArtifactType
-  content_json: Record<string, unknown>
+  content_json: ArtifactContent
+  observations?: string
   created_at: string
   updated_at: string
 }

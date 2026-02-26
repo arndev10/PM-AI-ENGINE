@@ -1,10 +1,17 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { unstable_noStore } from 'next/cache'
 import { getSupabaseAdmin } from '@/lib/supabase/server'
+import ProcessDocumentButton from './ProcessDocumentButton'
+import ArtifactTabs from './ArtifactTabs'
+import ProjectHeader from './ProjectHeader'
+import ProjectRefreshOnEnter from './ProjectRefreshOnEnter'
+import type { Artifact } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ProjectDetailPage ({ params }: { params: Promise<{ id: string }> }) {
+  unstable_noStore()
   const { id } = await params
   const supabase = getSupabaseAdmin()
   const { data: project, error } = await supabase
@@ -19,38 +26,43 @@ export default async function ProjectDetailPage ({ params }: { params: Promise<{
 
   const hasContext = project.structured_context_json != null
 
+  let artifacts: Artifact[] = []
+  if (hasContext) {
+    const { data } = await supabase
+      .from('artifacts')
+      .select('*')
+      .eq('project_id', id)
+      .order('created_at')
+    artifacts = (data ?? []) as Artifact[]
+  }
+
   return (
     <div className="space-y-8">
-      <div>
-        <Link href="/projects" className="text-sm text-slate-600 hover:text-slate-800">
-          ← Proyectos
-        </Link>
-        <h1 className="mt-2 text-2xl font-bold text-slate-800">
-          {project.name || 'Sin nombre'}
-        </h1>
-        <p className="mt-1 text-slate-600">
-          {project.industry && `${project.industry} · `}
-          {project.duration_estimate && `${project.duration_estimate} · `}
-          {project.budget_estimate && project.budget_estimate}
-        </p>
-      </div>
+      <ProjectHeader
+        projectId={project.id}
+        name={project.name || 'Sin nombre'}
+        industry={project.industry}
+        durationEstimate={project.duration_estimate}
+        budgetEstimate={project.budget_estimate}
+      />
 
       {!hasContext && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800">
           <p className="font-medium">Documento subido</p>
           <p className="mt-1 text-sm">
-            El siguiente paso es procesar el documento (extracción + estructuración) para generar el contexto y luego los artefactos. El endpoint <code className="rounded bg-amber-100 px-1">/api/process</code> estará disponible en la siguiente iteración.
+            Procesa el documento para extraer el texto del PDF y preparar el contexto. Luego podrás generar los artefactos (Charter, Risk Register, etc.).
           </p>
+          <div className="mt-4">
+            <ProcessDocumentButton projectId={id} />
+          </div>
         </div>
       )}
 
       {hasContext && (
-        <section>
-          <h2 className="text-lg font-semibold text-slate-800">Artefactos</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Genera o edita Charter, Risk Register, Stakeholder Register y WBS/Backlog. (UI en siguiente iteración.)
-          </p>
-        </section>
+        <>
+          <ProjectRefreshOnEnter />
+          <ArtifactTabs projectId={id} initialArtifacts={artifacts} />
+        </>
       )}
     </div>
   )
