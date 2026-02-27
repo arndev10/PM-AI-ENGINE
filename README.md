@@ -1,6 +1,6 @@
 # PM AI Engine
 
-AI-powered tool for uploading contracts, SoWs or RFPs, extracting structured project context, and generating PM artefacts aligned with PMBOK® 8.
+AI-powered SaaS tool for uploading contracts, SoWs or RFPs, extracting structured project context, and generating PM artefacts aligned with PMBOK® 8.
 
 ## Features
 
