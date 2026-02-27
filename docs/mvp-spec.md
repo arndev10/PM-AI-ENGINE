@@ -25,7 +25,7 @@ Alcance técnico del MVP: flujo, datos, endpoints y orden de implementación.
 | industry | text | IT, Telecom, Construcción, etc. |
 | duration_estimate | text | Ej. "6 meses" |
 | budget_estimate | text | Ej. "100k USD" |
-| methodology | text | predictivo | agil | hibrido |
+| methodology | text | predictivo \| agil \| hibrido |
 | structured_context_json | jsonb | JSON núcleo (scope, deliverables, risks, etc.) |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
@@ -51,7 +51,7 @@ Para guardar versiones editadas de cada artefacto (Charter, Risk, etc.) y no reg
 |-------|------|--------|
 | id | uuid | PK |
 | project_id | uuid | FK |
-| type | text | charter | risk_register | stakeholder_register | wbs | backlog |
+| type | text | charter \| risk_register \| stakeholder_register \| wbs \| backlog |
 | content_json | jsonb | Contenido editable |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
@@ -130,3 +130,4 @@ Incluir `evidence` (o `source_sections`) donde aplique para trazabilidad.
 ## Variables de entorno
 
 Ver `.env.example`. No commitear `.env`; en Vercel configurar las mismas variables.
+

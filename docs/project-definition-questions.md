@@ -81,6 +81,7 @@ Documento para cerrar alcance, prioridades y decisiones antes de construir. Incl
 ## Sugerencias y feedback al brainstorm
 
 ### Lo que está muy bien definido
+
 - **JSON estructurado** como núcleo: buena idea; evita re-enviar el PDF entero en cada prompt.
 - **Pipeline** (extracción → estructuración → generación por artefacto): alineado con optimización de tokens.
 - **Supabase** (Postgres + Storage + vector después): coherente y escalable.
@@ -95,7 +96,7 @@ Documento para cerrar alcance, prioridades y decisiones antes de construir. Incl
    Mantener consistencia: o todo en kebab-case (`/api/parse-contract`) o todo en camelCase. Tu lista ya usa kebab-case; seguir así.
 
 3. **`/api/upload` vs `/api/parse-contract`**  
-   Decidir si “upload” solo guarda el archivo y “parse-contract” recibe `document_id` o si “upload” hace upload + parse en uno. Recomendación: upload devuelve `file_url`/`document_id`, y un solo endpoint “process” o “parse-contract” que recibe ese id + metadatos (tipo proyecto, duración, etc.) y devuelve el JSON. Así separas almacenamiento de lógica.
+   Decidir si “upload” solo guarda el archivo y “parse-contract” recibe `document_id` o si “upload" hace upload + parse en uno. Recomendación: upload devuelve `file_url`/`document_id`, y un solo endpoint “process” o “parse-contract” que recibe ese id + metadatos (tipo proyecto, duración, etc.) y devuelve el JSON. Así separas almacenamiento de lógica.
 
 4. **Estructura del JSON**  
    Añadir algo como `source_sections` o `evidence` (p.ej. “cláusula 4.2”) para cada campo importante. Ayuda a auditoría y a que el usuario confíe en la salida (“de dónde salió esto”).
@@ -119,4 +120,3 @@ Responder al menos las preguntas de las secciones **1**, **2** y **4** (usuario,
 2. Definir **historias de usuario** o tareas para el primer sprint.
 3. Armar la **estructura del repo** (Next.js, carpetas, env) y el primer flujo: upload → parse → pantalla de resultado.
 
-Si quieres, el siguiente paso puede ser: “con mis respuestas, genera la spec del MVP y la estructura de carpetas del proyecto”.

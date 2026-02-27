@@ -1,75 +1,81 @@
 # PM AI Engine
 
-Herramienta privada para subir contratos/SoW/RFP, extraer contexto estructurado y generar artefactos de gestión (Charter, Risk Register, Stakeholder Register, WBS/Backlog) alineados a PMBOK 8.
+AI-powered tool for uploading contracts, SoWs or RFPs, extracting structured project context, and generating PM artefacts aligned with PMBOK® 8.
 
-## Stack
+## Features
 
-- **Next.js 14** (App Router), **TypeScript**, **TailwindCSS**
-- **Supabase** (PostgreSQL, Storage)
-- **OpenAI** (extracción de contexto y generación de artefactos)
-- **docx** / **pdfkit** (export Word y PDF)
+- **Document ingestion**: upload contracts, SoWs or RFPs in PDF.
+- **AI context extraction**: structure key project information using OpenAI.
+- **PM artefact generation**: Project Charter, Risk Register, Stakeholder Register, WBS/Backlog.
+- **Inline editing**: adjust artefacts, key fields and observations directly in the UI.
+- **Export**: download artefacts as Word (.docx) and PDF with consistent filenames.
+- **Supabase-backed storage**: persist projects, artefacts and observations.
 
-## Requisitos
+## Tech Stack
 
-- Node.js 18+
-- Cuenta [Supabase](https://supabase.com) y [OpenAI](https://platform.openai.com)
+- **Frontend**: Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS  
+- **Backend**: Next.js API routes (Node.js 18, TypeScript)  
+- **Database**: Supabase (PostgreSQL, Storage buckets)  
+- **AI & Export**: OpenAI API, `docx`, `pdfkit`  
 
 ## Setup
 
-1. Clonar / abrir el proyecto y instalar dependencias:
+### Web app (Next.js + Supabase + OpenAI)
 
-   ```bash
-   npm install
-   ```
+```bash
+# Clone the repository
+git clone <REPO_URL>
+cd pm-ai-engine
 
-2. Copiar variables de entorno:
+# Install dependencies
+npm install
 
-   ```bash
-   cp .env.example .env
-   ```
+# Environment variables (Windows example)
+copy .env.example .env
 
-3. Rellenar `.env` con tus credenciales:
+# Edit .env and set:
+# OPENAI_API_KEY=
+# NEXT_PUBLIC_SUPABASE_URL=
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=
+# SUPABASE_SERVICE_ROLE_KEY=
 
-   - `OPENAI_API_KEY`: clave de OpenAI (para la fase de procesamiento).
-   - `NEXT_PUBLIC_SUPABASE_URL`: URL del proyecto Supabase.
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: anon key de Supabase.
-   - `SUPABASE_SERVICE_ROLE_KEY`: service role key (solo en servidor; no exponer en cliente).
+# Prepare Supabase (run in Supabase SQL editor)
+# 1) supabase/migrations/001_initial.sql
+# 2) supabase/migrations/002_artifacts_observations.sql
 
-4. En Supabase:
+# Run the development server
+npm run dev
+```
 
-   - Crear las tablas ejecutando en el SQL Editor, en orden: `supabase/migrations/001_initial.sql` y `supabase/migrations/002_artifacts_observations.sql`.
-   - En **Storage**, crear un bucket llamado `documents` y marcarlo como **public** (o configurar políticas RLS según quieras).
+- The app runs at `http://localhost:3000`.
 
-5. Arrancar en desarrollo:
+## Project Structure
 
-   ```bash
-   npm run dev
-   ```
+```bash
+pm-ai-engine/
+  app/                         # Next.js App Router entrypoints
+    api/                       # HTTP API routes (upload, projects, artefacts, export)
+    projects/                  # Project list, detail and creation pages
+      [id]/                    # Project detail, artefacts view/edit
+      new/                     # New project creation flow
+  lib/                         # Shared server/client utilities
+    openai/                    # OpenAI integration and document structuring
+    export/                    # Word/PDF generation helpers
+    supabase/                  # Supabase client and helpers
+  types/                       # Shared TypeScript types (project, artefacts, context)
+  supabase/
+    migrations/                # SQL migrations for PostgreSQL schema
+  docs/                        # Additional documentation (definition, setup, MVP notes)
+  public/                      # Static assets
+  .env.example                 # Example environment variables
+  package.json                 # NPM scripts and dependencies
+  next.config.js               # Next.js configuration
+  tailwind.config.ts           # Tailwind CSS configuration
+  tsconfig.json                # TypeScript configuration
+  .eslintrc.json               # ESLint configuration
+```
 
-   Abre [http://localhost:3000](http://localhost:3000).
+## License
 
-## Flujo
+This project is licensed under the MIT License.
 
-1. **Lista de proyectos** (`/projects`): ver, abrir, editar o eliminar proyectos.
-2. **Nuevo proyecto** (`/projects/new`): subir PDF + metadatos (nombre, industria, duración, presupuesto, enfoque).
-3. **Detalle del proyecto** (`/projects/[id]`): procesar el documento (extracción + estructuración con OpenAI) y generar artefactos.
-4. **Artefactos**: Charter, Risk Register, Stakeholders, WBS. Edición inline, observaciones, export Word y PDF (01_Project-Charter, 02_Risk-register, etc.).
-
-## Subir a GitHub
-
-Antes del primer `git push`:
-
-- **No se suben** (están en `.gitignore`):
-  - **`.env`** y **`.env*.local`**: contienen API keys y secretos (OpenAI, Supabase). Quien clone el repo debe crear su propio `.env` desde `.env.example` y rellenar sus credenciales.
-  - **`node_modules/`**: dependencias; se reinstalan con `npm install`.
-  - **`.next/`**: build de Next.js; se regenera con `npm run build`.
-  - **`agent-transcripts/`**, **`.cursor/`**, **`/assets/`**: datos locales del IDE; no forman parte del código.
-- **Sí se sube**:
-  - **`.env.example`**: plantilla con nombres de variables y placeholders (sin valores reales), para que otros sepan qué configurar.
-
-Si en el pasado llegaste a commitear un `.env` o un `.env.example` con claves reales, revoca esas claves en OpenAI y Supabase y crea unas nuevas; no basta con borrarlas del repo después.
-
-## Deploy (Vercel)
-
-- Conectar el repo a Vercel y configurar las mismas variables de entorno.
-- Asegurar que el bucket `documents` en Supabase sea accesible (políticas o público según tu criterio).

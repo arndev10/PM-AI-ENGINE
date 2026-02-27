@@ -24,7 +24,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 OPENAI_API_KEY=
 ```
 
-- **NEXT_PUBLIC_SUPABASE_URL**: en [Supabase](https://supabase.com/dashboard) → tu proyecto → Settings → API → Project URL.
+- **NEXT_PUBLIC_SUPABASE_URL**: en Supabase → tu proyecto → Settings → API → Project URL.
 - **NEXT_PUBLIC_SUPABASE_ANON_KEY**: mismo menú → Project API keys → `anon` public.
 - **SUPABASE_SERVICE_ROLE_KEY**: mismo menú → `service_role` (secret). No lo expongas en el cliente.
 
@@ -57,3 +57,4 @@ npm run dev
 ---
 
 Con esto, al subir un PDF la app debería crear el proyecto, subir el archivo a Storage y registrar el documento. Si sigue fallando, el mensaje en rojo en el formulario debería indicar el motivo (falta de variables, bucket, tabla, etc.).
+

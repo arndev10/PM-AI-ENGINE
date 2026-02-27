@@ -39,6 +39,8 @@ yarn-error.log*
 .idea
 .vscode
 .cursor
+.agents/
+skills-lock.json
 
 # conversaciones y datos locales del IDE
 agent-transcripts/
